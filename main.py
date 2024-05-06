@@ -2,24 +2,13 @@ import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import faiss
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores.faiss import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain_community.chat_models import ChatOpenAI
 import pickle
 from dotenv import load_dotenv
 import os
-
-with st. sidebar:
-    st.title("CHAT PDF")
-    st .markdown(
-        '''
-        #About
-        This app is an LLM-powered chatbot built using:
-        - [Streamlit] (https://streamlit.io/)
-        - [LangChain] (https://python.langchain.com/)
-        - [OpenAI] (https://platform.openai.com/docs/models) LLM model
-        ''')
-    add_vertical_space(5)
-    st.write("Chat with Pdf files")
 
 
 def main():
@@ -46,9 +35,18 @@ def main():
                 VectorStore = pickle.load(f)
         else:
             embeddings = OpenAIEmbeddings()
-            VectorStore = faiss.from_texts(chunks, embeddings=embeddings)
+            VectorStore = FAISS.from_texts(texts=chunks, embedding=embeddings)
             with open(f"{store_name}.pkl", "wb") as f:
                 pickle.dump(VectorStore, )
+
+        query = st.text_input("Ask question about your PDF file: ")
+
+        if query:
+            docs = VectorStore.similarity_search(query=query)
+            llm = ChatOpenAI(model='gpt-3.5-turbo')
+            chain = load_qa_chain(llm=llm, chain_type="stuff")
+            response = chain.run(input_documents=docs, question=query)
+            st.write(response)
 
 
 if __name__ == "__main__":
