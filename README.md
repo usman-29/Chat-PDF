@@ -12,17 +12,17 @@ This is a Streamlit application that allows users to interactively chat with a P
 ## How to Use
 
 1. Clone the repository to your local machine:
-'''
+```
 git clone https://github.com/usman-29/Chat-PDF.git
-'''
+```
 2. Install the required dependencies:
-'''
+```
 pip install -r requirements.txt
-'''
+```
 3. Run the application:
-'''
+```
 streamlit run main.py
-'''
+```
 
 4. Upload a PDF document using the file uploader.
 5. Ask questions about the PDF document in the provided text input field.
